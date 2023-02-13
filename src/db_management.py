@@ -100,14 +100,14 @@ class MongoCRUD:
         return self
 
     
-    def update_transaction(self, user_id: str, transaction_id: str) -> MongoCRUD:
+    def update_transaction(self, user_id: str, transaction_id: str):
         return self
 
     
     """
     " DELETE part
     """
-    def delete_user(self, user_id: str) -> MongoCRUD:
+    def delete_user(self, user_id: str):
         return self
 
     
@@ -125,5 +125,5 @@ class MongoCRUD:
         return self
     
 
-    def delete_transaction(self, transaction_id: str) -> MongoCRUD:
+    def delete_transaction(self, transaction_id: str):
         return self

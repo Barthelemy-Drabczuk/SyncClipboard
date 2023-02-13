@@ -4,7 +4,6 @@ class ClipUser:
 
     def __init__(self, username: str, password: str, email: str) -> None:
 <<<<<<< HEAD
-<<<<<<< HEAD
         """_summary_
 
         Args:
