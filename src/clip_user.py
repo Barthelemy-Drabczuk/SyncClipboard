@@ -3,6 +3,7 @@ class ClipUser:
     """
 
     def __init__(self, username: str, password: str, email: str) -> None:
+<<<<<<< HEAD
         """_summary_
 
         Args:
@@ -50,6 +51,18 @@ class ClipUser:
         Returns:
             dict: _description_
         """
+=======
+        self.username = username
+        self.password = password
+        self.email = email
+        self.hash = hash(self.username \
+            + self.password \
+            + self.email
+            )
+
+
+    def to_json(self) -> dict:
+>>>>>>> a95dd75 (implementing the first features to pass the insert test)
         return {
             "id": self.hash,
             "username": self.username,
@@ -59,9 +72,12 @@ class ClipUser:
 
 
     def __str__(self) -> str:
+<<<<<<< HEAD
         """_summary_
 
         Returns:
             str: _description_
         """
+=======
+>>>>>>> a95dd75 (implementing the first features to pass the insert test)
         return str(self.to_json())
