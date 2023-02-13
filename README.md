@@ -10,6 +10,10 @@ The idea is to create a webservice, that would probably be a stack with all the 
 
 Could use python and the [PyClip](https://pypi.org/project/pyclip/) and/or [Pillow](https://pypi.org/project/Pillow/) libraries. Just have a quick GUI to login the user account and start the listener deamon and a few settings (peek/pop; shortcut to use instead of Ctrl+C/Ctrl+V). Maybe in the futures adding a way to view the clipboard history ?
 
+### Update 13/02/23
+
+Actually using [Pyperclip](https://pypi.org/project/pyperclip/) in the end for dealing with the text's clipboard and [Pynput](https://pypi.org/project/pynput/) for capturing keyboard shortcuts.
+
 ## Server
 
 Python would still work just fine, probably with a docker image of django or something of the sort running the observer and the user's stack via database's calls.
