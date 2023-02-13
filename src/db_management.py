@@ -108,6 +108,16 @@ class MongoCRUD:
 
     
     def update_transaction(self, user_id: str, transaction_id: str):
+<<<<<<< HEAD
+        return self
+
+    
+    """
+    " DELETE part
+    """
+    def delete_user(self, user_id: str):
+=======
+>>>>>>> a95dd75 (implementing the first features to pass the insert test)
         return self
 
     
@@ -119,8 +129,5 @@ class MongoCRUD:
     
 
     def delete_transaction(self, transaction_id: str):
-        return self
-    
-
     def delete_transaction(self, transaction_id: str):
         return self
