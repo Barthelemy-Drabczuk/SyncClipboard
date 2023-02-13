@@ -1,5 +1,6 @@
 import signal
 import pyperclip
+import pyautogui as pgui
 from pynput.keyboard import Key, Listener, KeyCode
 
 
@@ -30,13 +31,13 @@ class Client:
                 print(f"__on_press - copied buffer: {self.get_copied_buffer()}")
             elif KeyCode.from_char('v') in self.get_read_buffer():
                 if len(self.get_copied_buffer()) != 0:
-                    pyperclip.copy(self.get_copied_buffer()[-1])
-                    pyperclip.paste()
+                    pasting: str = pyperclip.copy(self.get_copied_buffer()[-1])
+                    pgui.write(pasting)
                     self.pasted_stuff.append(self.get_copied_buffer()[-1])
                     print(f"__on_press - pasted buffer with copy: {self.pasted_stuff}")
                 else:
                     pyperclip.copy('')
-                    pyperclip.paste()
+                    pgui.write('')
                     self.pasted_stuff.append('')
                     print(f"__on_press - pasted buffer without copy: {self.pasted_stuff}")
 
