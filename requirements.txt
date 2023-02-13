@@ -1,0 +1,5 @@
+PyAutoGUI==0.9.53
+pymongo==4.3.3
+pynput==1.7.6
+pyperclip==1.8.2
+pytest==7.2.1
