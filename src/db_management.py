@@ -1,4 +1,5 @@
 from pymongo import MongoClient, CursorType
+from pymongo import MongoClient, CursorType
 
 from clip_user import ClipUser
 from clip_object import ClipObject
@@ -18,10 +19,18 @@ class MongoCRUD:
 
     def get_db(self) -> MongoClient:
         return self.client
+        self.client = MongoClient()
+        self.prod_env = self.client['prod_env']
+        self.users = self.prod_env['users']
+        self.transactions = self.prod_env['transactions']
+
+    def get_db(self) -> MongoClient:
+        return self.client
 
     """
     " CREATE part
     """
+    def insert_user(self, user: ClipUser):
     def insert_user(self, user: ClipUser):
         """_summary_
 
@@ -32,9 +41,11 @@ class MongoCRUD:
             MongoCRUD: _description_
         """
         self.users.insert_one(user)
+        self.users.insert_one(user)
         return self
 
 
+    def insert_transaction(self, user: ClipUser, obj: ClipObject):
     def insert_transaction(self, user: ClipUser, obj: ClipObject):
         """_summary_
 
@@ -100,28 +111,14 @@ class MongoCRUD:
         return self
 
     
-    def update_transaction(self, user_id: str, transaction_id: str):
-        return self
-
-    
     """
     " DELETE part
     """
     def delete_user(self, user_id: str):
         return self
-
     
-    """
-    " DELETE part
-    """
-    def delete_user(self, user_id: str):
-        return self
 
-    
-    """
-    " DELETE part
-    """
-    def delete_user(self, user_id: str) -> MongoCRUD:
+    def delete_transaction(self, transaction_id: str):
         return self
     
 
