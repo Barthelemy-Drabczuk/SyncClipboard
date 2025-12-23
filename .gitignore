@@ -160,3 +160,7 @@ cython_debug/
 #.idea/
 
 .vscode
+
+# GitHub workflows and test results
+.github/
+TEST_RESULTS.md
