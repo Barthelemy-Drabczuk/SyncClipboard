@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: syncclipboard-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: prod_env
+    networks:
+      - syncclipboard-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  webapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: syncclipboard-webapp
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    environment:
+      - MONGODB_HOST=mongodb
+      - MONGODB_PORT=27017
+      - FLASK_ENV=development
+    networks:
+      - syncclipboard-network
+    volumes:
+      - ./src:/app/src
+
+networks:
+  syncclipboard-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+    driver: local

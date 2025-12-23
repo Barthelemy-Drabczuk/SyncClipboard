@@ -1,0 +1,173 @@
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "syncclipboard"
+version = "0.1.0"
+description = "A real-time clipboard synchronization system across multiple devices"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "SyncClipboard Contributors"}
+]
+keywords = ["clipboard", "sync", "real-time", "websocket", "mongodb"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Communications",
+    "Topic :: System :: Networking",
+]
+
+dependencies = [
+    "PyAutoGUI==0.9.53",
+    "pymongo==4.3.3",
+    "pynput==1.7.6",
+    "pyperclip==1.8.2",
+    "Pillow>=10.0.0",
+    "Flask==3.0.0",
+    "Flask-SocketIO==5.3.5",
+    "python-socketio==5.10.0",
+    "requests==2.31.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==7.2.1",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "flake8>=6.0.0",
+    "mypy>=1.0.0",
+]
+
+test = [
+    "pytest==7.2.1",
+    "pytest-cov>=4.0.0",
+]
+
+# Platform-specific dependencies for enhanced clipboard support
+windows = [
+    "pywin32>=305; sys_platform == 'win32'",
+]
+
+macos = [
+    # pngpaste can be installed via: brew install pngpaste
+    # No PyPI package required, uses system osascript
+]
+
+linux = [
+    # Linux requires system packages (not PyPI packages):
+    # X11: sudo apt-get install xclip (or xsel)
+    # Wayland: sudo apt-get install wl-clipboard
+]
+
+[project.urls]
+Homepage = "https://github.com/yourusername/syncclipboard"
+Repository = "https://github.com/yourusername/syncclipboard"
+Issues = "https://github.com/yourusername/syncclipboard/issues"
+
+# Uncomment when entry points are implemented
+# [project.scripts]
+# syncclipboard-server = "webapp:main"
+# syncclipboard-client = "main_client:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"*" = ["templates/*", "static/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["src/tests"]
+python_files = ["*_test.py", "test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-v",
+    "--strict-markers",
+    "--tb=short",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+]
+
+[tool.black]
+line-length = 88
+target-version = ["py38", "py39", "py310", "py311", "py312"]
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+
+[tool.flake8]
+max-line-length = 88
+extend-ignore = ["E203", "E266", "E501", "W503"]
+exclude = [
+    ".git",
+    "__pycache__",
+    "build",
+    "dist",
+    ".eggs",
+    "*.egg-info",
+    ".venv",
+    "venv",
+]
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+ignore_errors = true
+
+[tool.coverage.run]
+source = ["src"]
+omit = [
+    "*/tests/*",
+    "*/test_*.py",
+    "*/*_test.py",
+]
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "@abstractmethod",
+]

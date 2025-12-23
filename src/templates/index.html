@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SyncClipboard - Clipboard History</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+        }
+
+        .auth-section, .app-section {
+            padding: 30px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            margin-top: 10px;
+        }
+
+        .clipboard-history {
+            margin-top: 20px;
+        }
+
+        .clipboard-item {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .clipboard-item-content {
+            font-family: 'Courier New', monospace;
+            word-wrap: break-word;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .clipboard-item-time {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .status {
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .status.error {
+            background: #fee;
+            color: #c33;
+        }
+
+        .status.success {
+            background: #efe;
+            color: #3c3;
+        }
+
+        .user-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .user-info strong {
+            color: #667eea;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            background: #667eea;
+            color: white;
+            border-radius: 4px;
+            font-size: 0.8em;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>SyncClipboard</h1>
+            <p>Your clipboard history across all devices</p>
+        </div>
+
+        <!-- Authentication Section -->
+        <div class="auth-section" id="authSection">
+            <div id="statusMessage" class="status hidden"></div>
+
+            <div id="loginForm">
+                <h2>Login</h2>
+                <div class="form-group">
+                    <label for="loginUsername">Username</label>
+                    <input type="text" id="loginUsername" placeholder="Enter your username">
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" placeholder="Enter your password">
+                </div>
+                <button class="btn" onclick="login()">Login</button>
+                <button class="btn btn-secondary" onclick="showRegister()">Register Instead</button>
+            </div>
+
+            <div id="registerForm" class="hidden">
+                <h2>Register</h2>
+                <div class="form-group">
+                    <label for="registerUsername">Username</label>
+                    <input type="text" id="registerUsername" placeholder="Choose a username">
+                </div>
+                <div class="form-group">
+                    <label for="registerEmail">Email</label>
+                    <input type="email" id="registerEmail" placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">Password</label>
+                    <input type="password" id="registerPassword" placeholder="Choose a password">
+                </div>
+                <button class="btn" onclick="register()">Register</button>
+                <button class="btn btn-secondary" onclick="showLogin()">Login Instead</button>
+            </div>
+        </div>
+
+        <!-- Application Section -->
+        <div class="app-section hidden" id="appSection">
+            <div class="user-info">
+                <strong>Logged in as:</strong> <span id="currentUsername"></span>
+                <span class="badge" id="connectionStatus">Disconnected</span>
+                <button class="btn btn-secondary" onclick="logout()" style="width: auto; float: right; padding: 6px 12px;">Logout</button>
+            </div>
+
+            <h2>Clipboard History</h2>
+            <div class="clipboard-history" id="clipboardHistory">
+                <div class="empty-state">No clipboard entries yet. Start copying!</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let socket;
+        let currentUser = null;
+
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('statusMessage');
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+            statusEl.classList.remove('hidden');
+            setTimeout(() => statusEl.classList.add('hidden'), 3000);
+        }
+
+        function showLogin() {
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('registerForm').classList.add('hidden');
+        }
+
+        function showRegister() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('registerForm').classList.remove('hidden');
+        }
+
+        async function login() {
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    currentUser = { id: data.user_id, username: data.username };
+                    showApp();
+                } else {
+                    showStatus(data.message || 'Login failed', 'error');
+                }
+            } catch (error) {
+                showStatus('Error connecting to server', 'error');
+            }
+        }
+
+        async function register() {
+            const username = document.getElementById('registerUsername').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, email, password })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    currentUser = { id: data.user_id, username: data.username };
+                    showApp();
+                } else {
+                    showStatus(data.message || 'Registration failed', 'error');
+                }
+            } catch (error) {
+                showStatus('Error connecting to server', 'error');
+            }
+        }
+
+        function logout() {
+            if (socket) socket.disconnect();
+            currentUser = null;
+            document.getElementById('authSection').classList.remove('hidden');
+            document.getElementById('appSection').classList.add('hidden');
+        }
+
+        async function showApp() {
+            document.getElementById('authSection').classList.add('hidden');
+            document.getElementById('appSection').classList.remove('hidden');
+            document.getElementById('currentUsername').textContent = currentUser.username;
+
+            // Connect to WebSocket
+            socket = io();
+
+            socket.on('connect', () => {
+                document.getElementById('connectionStatus').textContent = 'Connected';
+                document.getElementById('connectionStatus').style.background = '#28a745';
+                socket.emit('join', { user_id: currentUser.id });
+            });
+
+            socket.on('disconnect', () => {
+                document.getElementById('connectionStatus').textContent = 'Disconnected';
+                document.getElementById('connectionStatus').style.background = '#dc3545';
+            });
+
+            socket.on('clipboard_update', (data) => {
+                if (data.user_id === currentUser.id) {
+                    addClipboardItem(
+                        data.content,
+                        data.timestamp,
+                        true,
+                        data.content_type || 'text',
+                        data.image_data
+                    );
+                }
+            });
+
+            // Load clipboard history
+            await loadHistory();
+        }
+
+        async function loadHistory() {
+            try {
+                const response = await fetch(`/api/clipboard/${currentUser.id}?limit=50`);
+                const data = await response.json();
+
+                if (data.success && data.history.length > 0) {
+                    const historyEl = document.getElementById('clipboardHistory');
+                    historyEl.innerHTML = '';
+                    data.history.forEach(item => {
+                        addClipboardItem(
+                            item.content,
+                            item.timestamp,
+                            false,
+                            item.content_type || 'text',
+                            item.image_data
+                        );
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading history:', error);
+            }
+        }
+
+        function addClipboardItem(content, timestamp, prepend = true, content_type = 'text', image_data = null) {
+            const historyEl = document.getElementById('clipboardHistory');
+
+            // Remove empty state if present
+            if (historyEl.querySelector('.empty-state')) {
+                historyEl.innerHTML = '';
+            }
+
+            const item = document.createElement('div');
+            item.className = 'clipboard-item';
+
+            const contentEl = document.createElement('div');
+            contentEl.className = 'clipboard-item-content';
+
+            // Display based on content type
+            if (content_type === 'image' && image_data) {
+                const img = document.createElement('img');
+                img.src = `data:image/png;base64,${image_data}`;
+                img.style.maxWidth = '100%';
+                img.style.maxHeight = '300px';
+                img.style.borderRadius = '4px';
+                img.style.marginTop = '8px';
+                contentEl.appendChild(document.createTextNode(content));
+                contentEl.appendChild(document.createElement('br'));
+                contentEl.appendChild(img);
+            } else {
+                contentEl.textContent = content;
+            }
+
+            const timeEl = document.createElement('div');
+            timeEl.className = 'clipboard-item-time';
+            const date = new Date(typeof timestamp === 'number' ? timestamp * 1000 : timestamp);
+            timeEl.textContent = date.toLocaleString();
+
+            item.appendChild(contentEl);
+            item.appendChild(timeEl);
+
+            if (prepend) {
+                historyEl.insertBefore(item, historyEl.firstChild);
+            } else {
+                historyEl.appendChild(item);
+            }
+        }
+    </script>
+</body>
+</html>
